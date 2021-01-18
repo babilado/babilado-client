@@ -1,13 +1,13 @@
 use babilado_types::Event;
 use jsonl::Connection;
-use std::io::{self, BufReader};
+use std::io;
 use std::net::TcpStream;
 
 fn main() -> anyhow::Result<()> {
     let stdin = io::stdin();
 
     let stream = TcpStream::connect("127.0.0.1:9999")?;
-    let mut server_connection = Connection::new(BufReader::new(stream.try_clone()?), stream);
+    let mut server_connection = Connection::new_from_tcp_stream(stream)?;
 
     loop {
         let mut message = String::new();
