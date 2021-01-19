@@ -1,22 +1,35 @@
 use babilado_types::Event;
-use jsonl::Connection;
-use std::io;
+use std::io::{self, BufReader, Write};
 use std::net::TcpStream;
+use std::thread;
 
 fn main() -> anyhow::Result<()> {
     let stdin = io::stdin();
 
-    let stream = TcpStream::connect("127.0.0.1:9999")?;
-    let mut server_connection = Connection::new_from_tcp_stream(stream)?;
+    let mut stream = TcpStream::connect("127.0.0.1:9999")?;
+
+    thread::spawn({
+        let stream = stream.try_clone()?;
+
+        || {
+            if let Err(e) = listen_for_events(BufReader::new(stream)) {
+                eprintln!("Error: {:?}", e);
+            }
+        }
+    });
 
     loop {
         let mut message = String::new();
         stdin.read_line(&mut message)?;
 
-        server_connection.write(&Event::NewMessage { text: message })?;
-        server_connection.flush()?;
+        jsonl::write(&mut stream, &Event::NewMessage { text: message })?;
+        stream.flush()?;
+    }
+}
 
-        let response: Event = server_connection.read()?;
-        dbg!(response);
+fn listen_for_events(mut stream: BufReader<TcpStream>) -> anyhow::Result<()> {
+    loop {
+        let event: Event = jsonl::read(&mut stream)?;
+        dbg!(event);
     }
 }
