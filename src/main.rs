@@ -1,4 +1,5 @@
 use babilado_types::Event;
+use notify_rust::Notification;
 use std::io::{self, BufReader, Write};
 use std::net::TcpStream;
 use std::thread;
@@ -30,6 +31,15 @@ fn main() -> anyhow::Result<()> {
 fn listen_for_events(mut stream: BufReader<TcpStream>) -> anyhow::Result<()> {
     loop {
         let event: Event = jsonl::read(&mut stream)?;
-        dbg!(event);
+        dbg!(&event);
+
+        match event {
+            Event::NewMessage { text } => {
+                Notification::new()
+                    .summary("New message!")
+                    .body(&text)
+                    .show()?;
+            }
+        }
     }
 }
