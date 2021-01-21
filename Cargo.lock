@@ -20,9 +20,9 @@ dependencies = [
 
 [[package]]
 name = "babilado-types"
-version = "0.3.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b79e6555581a53aa3944885754dfe2719d363e8c82ebf49af4201283d2633416"
+checksum = "6596dbc02dc932f0c0717f129fa9fc4c36e48f753fa8c67605fbc4a9fad33b0c"
 dependencies = [
  "oorandom",
  "serde",
