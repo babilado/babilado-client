@@ -1,15 +1,17 @@
 use babilado_types::{Event, Message, Nickname, Tag, User, UserId};
+use oorandom::Rand64;
 use std::io::{self, BufReader, Write};
 use std::net::TcpStream;
 use std::thread;
 
 fn main() -> anyhow::Result<()> {
     let stdin = io::stdin();
+    let mut rng = Rand64::new(gen_random_seed()?);
+
     let nickname = choose_nickname(&stdin)?;
     let tag = choose_tag(&stdin)?;
-    let mut random_seed = [0; 16];
-    getrandom::getrandom(&mut random_seed)?;
-    let user_id = UserId::gen(&mut oorandom::Rand64::new(u128::from_le_bytes(random_seed)));
+    let user_id = UserId::gen(&mut rng);
+
     let mut stream = TcpStream::connect("127.0.0.1:9999")?;
 
     jsonl::write(
@@ -90,4 +92,11 @@ fn prompt_and_read(stdin: &io::Stdin, prompt: &str) -> anyhow::Result<String> {
     let mut response = String::new();
     stdin.read_line(&mut response)?;
     Ok(response[0..response.len() - 1].to_string())
+}
+
+fn gen_random_seed() -> anyhow::Result<u128> {
+    let mut seed = [0; 16];
+    getrandom::getrandom(&mut seed)?;
+
+    Ok(u128::from_le_bytes(seed))
 }
