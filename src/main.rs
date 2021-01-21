@@ -1,4 +1,4 @@
-use babilado_types::Event;
+use babilado_types::{Event, Message};
 use std::io::{self, BufReader, Write};
 use std::net::TcpStream;
 use std::thread;
@@ -18,11 +18,20 @@ fn main() -> anyhow::Result<()> {
         }
     });
 
-    loop {
-        let mut message = String::new();
-        stdin.read_line(&mut message)?;
+    let user_id = rand::random();
 
-        jsonl::write(&mut stream, &Event::NewMessage { text: message })?;
+    loop {
+        let message = Message {
+            body: {
+                let mut body = String::new();
+                stdin.read_line(&mut body)?;
+
+                body
+            },
+            author: user_id,
+        };
+
+        jsonl::write(&mut stream, &Event::NewMessage(message))?;
         stream.flush()?;
     }
 }
