@@ -8,6 +8,6 @@ version = "0.1.0"
 [dependencies]
 anyhow = "1.0"
 babilado-types = "0.4.0"
-getrandom = "0.2.2"
+getrandom = {version = "0.2.2", features = ["std"]}
 jsonl = "4.0"
 oorandom = "11.1"
